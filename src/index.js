@@ -12,7 +12,7 @@ type Props = {
   children: (string, boolean, SrcSetData) => React.Node,
   delay?: number,
   onError?: (errorEvent: Event) => void,
-  placeholder: string,
+  placeholder: string | React.Node,
   src: string,
   srcSetData?: SrcSetData,
   noRetry?: boolean,

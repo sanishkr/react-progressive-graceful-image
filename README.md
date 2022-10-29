@@ -153,7 +153,7 @@ You can do this by adding the fallback image inside of a `<noscript>` tag in the
 | children    | `function`                             | `true`   | returns `src`, `loading`, and `srcSetData`        |
 | delay       | `number`                               | `false`  | time in milliseconds before src image is loaded          |
 | onError     | `function`                             | `false`  | returns error event                                      |
-| placeholder | `string`                               | `true`   | the src of the placeholder image                         |
+| placeholder | `string \| React.Node`                  | `true`   | the img src or React Component for the placeholder image                         |
 | src         | `string`                               | `true`   | the src of the main image                                |
 | srcSetData  | `{srcSet: "string", sizes: "string" }` | `false`  | srcset and sizes to be applied to the image              |
 | noRetry     | `boolean`                              | `false`  | flag to turn off re-trying (default: `false`)	           |
