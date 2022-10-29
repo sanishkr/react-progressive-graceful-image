@@ -13,7 +13,7 @@ declare module 'react-progressive-graceful-image' {
 		noRetry?: boolean;
 		noLazyLoad?: boolean;
 		rootMargin?: string;
-		threshold?: Array<number>;
+		threshold?: number | Array<number>;
 		children?: (src: string, loading?: boolean, srcSetData?: srcSetData) => React.Node;
 	}
 

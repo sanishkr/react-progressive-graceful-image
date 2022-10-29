@@ -159,7 +159,7 @@ You can do this by adding the fallback image inside of a `<noscript>` tag in the
 | noRetry     | `boolean`                              | `false`  | flag to turn off re-trying (default: `false`)	           |
 | noLazyLoad  | `boolean`                              | `false`  | flag to turn off lazy loading (default: `false`)         |
 | rootMargin  | `string`                               | `false`  | Intersection Observer Option (eg: `"0% 0% 25%"` -default)|
-| threshold   | `Array`                                | `false`  | Intersection Observer Option (eg: `[0]` -default)        |
+| threshold   | `number\|Array<number>`                 | `false`  | Intersection Observer Option (eg: `[0]` -default)        |
 
 ## Maintenance Status
 

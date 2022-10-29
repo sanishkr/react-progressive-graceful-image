@@ -18,7 +18,7 @@ type Props = {
   noRetry?: boolean,
   noLazyLoad?: boolean,
   rootMargin?: string,
-  threshold?: Array
+  threshold?: number | Array<number>
 };
 
 type State = {
