@@ -1,22 +1,21 @@
 import 'raf/polyfill';
 import React from 'react';
 import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import ProgressiveImage from '../src';
 
 configure({ adapter: new Adapter() });
 
-const src = 'https://image.xyz/source';
-const placeholder = 'https://image.xyz/placeholder';
+const src = 'https://via.placeholder.com/300x200/000/source';
+const placeholder = 'https://via.placeholder.com/30x20/000/placeholder';
 const srcSetData = {
   srcSet: 'srcSet',
   sizes: 'sizes'
 };
 
 const mountProgressiveImage = (renderFn, delay) => {
-  const defaultRender = image => {
-    return <img src={image} />;
-  };
+  const defaultRender = jest.fn(src => <img src={src} alt="an image" />);
+
   const render = renderFn || defaultRender;
   return mount(
     <ProgressiveImage
@@ -55,26 +54,29 @@ describe('react-progressive-graceful-image', () => {
     }
     /* eslint-enable no-console */
   });
-  // it('creates an instance of Image when mounted', () => {
-  //   const wrapper = mountProgressiveImage();
-  //   const instance = wrapper.instance();
-  //   expect(instance.image.constructor).toBe(HTMLImageElement);
-  // });
-  // it('sets the onload property on the Image instance', () => {
-  //   const wrapper = mountProgressiveImage();
-  //   const instance = wrapper.instance();
-  //   expect(instance.image.onload).toEqual(instance.onLoad);
-  // });
+  it('creates an instance of Image when mounted', () => {
+    const wrapper = mountProgressiveImage();
+    const instance = wrapper.instance();
+    wrapper.instance().loadImage(src);
+    expect(instance.image.constructor).toBe(HTMLImageElement);
+  });
+  it('sets the onload property on the Image instance', () => {
+    const wrapper = mountProgressiveImage();
+    const instance = wrapper.instance();
+    wrapper.instance().loadImage(src);
+    expect(instance.image.onload).toEqual(instance.onLoad);
+  });
   it('sets the onerror property on the Image instance', () => {
     const wrapper = mountProgressiveImage();
     const instance = wrapper.instance();
     // expect(instance.image.onerror).toEqual(instance.onError);
   });
-  // it('sets the src property on the Image instance', () => {
-  //   const wrapper = mountProgressiveImage();
-  //   const instance = wrapper.instance();
-  //   expect(instance.image.src).toEqual(src);
-  // });
+  it('sets the src property on the Image instance', () => {
+    const wrapper = mountProgressiveImage();
+    const instance = wrapper.instance();
+    wrapper.instance().loadImage(src);
+    expect(instance.image.src).toEqual(src);
+  });
   // it('sets the srcSet property on the Image instance', () => {
   //   const wrapper = mountProgressiveImage();
   //   const instance = wrapper.instance();
