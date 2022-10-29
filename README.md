@@ -4,6 +4,7 @@
 **Note:** I published this [interesting article on medium](https://medium.com/@sanishkr/react-progressive-graceful-image-c7a45b577f5f) to explain the idea and motivation behind building this npm package. And a small [code snippet](https://gist.github.com/sanishkr/7f520f227989133a779eb49726bc77cb) to make best use of it.
 
 **Update**
+- [0.7.0] : Allow ^v18 of `react` and `react-dom` as peer dependencies, add + fix props types.
 - [0.6.14] : Allow ^v17 of `react` and `react-dom` as peer dependencies.
 - [0.6.13] : `onError` bug-fix to works as expected.
 
