@@ -36,12 +36,12 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^9.0.0",
     "babel-jest": "^23.6.0",
     "babel-loader": "^8.0.2",
-    "enzyme": "^3.6.0",
-    "enzyme-adapter-react-16": "^1.5.0",
+    "enzyme": "^3.11.0",
     "eslint": "^5.6.0",
     "eslint-config-formidable": "^4.0.0",
     "eslint-config-prettier": "^3.0.1",
@@ -55,8 +55,8 @@
     "jest": "^23.6.0",
     "prettier": "^1.14.2",
     "raf": "^3.4.0",
-    "react": "^16.5.1",
-    "react-dom": "^16.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-test-renderer": "^16.5.1",
     "uglifyjs-webpack-plugin": "^2.0.0",
     "webpack": "^4.19.0",
@@ -64,11 +64,11 @@
     "webpack-dev-server": "^3.1.8"
   },
   "peerDependencies": {
-    "react": "^15.0.0-0 || ^16.0.0-0 || ^17.0.0-0",
-    "react-dom": "^15.0.0-0 || ^16.0.0-0 || ^17.0.0-0"
+    "react": "^15.0.0-0 || ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0",
+    "react-dom": "^15.0.0-0 || ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0"
   },
   "sideEffects": false,
   "dependencies": {
-    "@researchgate/react-intersection-observer": "^1.0.5"
+    "@researchgate/react-intersection-observer": "^1.3.5"
   }
 }
