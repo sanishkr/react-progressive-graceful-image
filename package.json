@@ -7,13 +7,15 @@
   "scripts": {
     "build": "babel src/index.js --out-file dist.js",
     "umd": "webpack --config webpack.config.umd.js",
-    "lint": "eslint {__tests__,src}/*.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "flow": "flow",
     "test:only": "jest",
     "test": "npm run lint && npm run test:only",
     "prepublish": "npm run pretty && npm run test && npm run build",
     "demo": "webpack-dev-server --inline --hot --config demo/webpack.config.js --content-base demo/",
-    "pretty": "prettier --write '{__tests__,src}/*.js'"
+    "format": "prettier --write \"{src,__tests__,demo,*.js,*.json,*.md}\"",
+    "format:check": "prettier --check \"{src,__tests__,demo,*.js,*.json,*.md}\""
   },
   "keywords": [
     "react",

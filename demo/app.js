@@ -1,13 +1,13 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import ProgressiveImage from '../src/index.js';
+import React from 'react'
+import {createRoot} from 'react-dom/client'
+import ProgressiveImage from '../src/index.js'
 
 const centerAlign = {
   alignItems: 'center',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center'
-};
+}
 
 const containerStyle = {
   ...centerAlign,
@@ -15,12 +15,12 @@ const containerStyle = {
   position: 'relative',
   maxWidth: 1440,
   margin: '0 auto'
-};
+}
 
 const imageStyle = {
   height: '100vh',
   minWidth: '100%'
-};
+}
 
 const textContainerStyle = {
   ...centerAlign,
@@ -29,14 +29,14 @@ const textContainerStyle = {
   position: 'absolute',
   right: 0,
   top: 0
-};
+}
 
 const textStyle = {
   color: '#fff',
   fontFamily: 'sans-serif',
   fontSize: '2.5em',
   textTransform: 'uppercase'
-};
+}
 
 class App extends React.Component {
   render() {
@@ -73,16 +73,16 @@ class App extends React.Component {
                   // sizes={srcSetData.sizes}
                   alt={`Image #${i + 1}`}
                 />
-              );
+              )
             }}
           </ProgressiveImage>
         ))}
       </div>
-    );
+    )
   }
 }
 
-const rootElement = document.getElementById('content');
-const root = createRoot(rootElement);
+const rootElement = document.getElementById('content')
+const root = createRoot(rootElement)
 
-root.render(<App />);
+root.render(<App />)

@@ -14,7 +14,7 @@ const srcSetData = {
 };
 
 const mountProgressiveImage = (renderFn, delay) => {
-  const defaultRender = jest.fn(src => <img src={src} alt="an image" />);
+  const defaultRender = jest.fn(src => <img src={src} alt='an image' />);
 
   const render = renderFn || defaultRender;
   return mount(
@@ -88,19 +88,19 @@ describe('react-progressive-graceful-image', () => {
   //   expect(instance.image.sizes).toEqual(srcSetData.sizes);
   // });
   it('renders placeholder image on initial render', () => {
-    const render = jest.fn(src => <img src={src} alt="an image" />);
+    const render = jest.fn(src => <img src={src} alt='an image' />);
     const wrapper = mountProgressiveImage(render);
     expect(render.mock.calls[0][0]).toEqual(src);
   });
   it('renders src image on second render', () => {
-    const render = jest.fn(src => <img src={src} alt="an image" />);
+    const render = jest.fn(src => <img src={src} alt='an image' />);
     const wrapper = mountProgressiveImage(render);
     wrapper.instance().loadImage(src);
     wrapper.instance().onLoad();
     expect(render.mock.calls[1][0]).toEqual(src);
   });
   it('sets loading to false after src image is loaded', () => {
-    const render = jest.fn(src => <img src={src} alt="an image" />);
+    const render = jest.fn(src => <img src={src} alt='an image' />);
     const wrapper = mountProgressiveImage(render);
     expect(render.mock.calls[0][1]).toEqual(false);
     wrapper.instance().loadImage(src);
@@ -109,7 +109,7 @@ describe('react-progressive-graceful-image', () => {
   });
   it('does not immediately set image if delay prop exists', () => {
     const delay = 3000;
-    const render = jest.fn(src => <img src={src} alt="an image" />);
+    const render = jest.fn(src => <img src={src} alt='an image' />);
     const wrapper = mountProgressiveImage(render, delay);
     wrapper.instance().loadImage(src);
     wrapper.instance().onLoad();
@@ -117,7 +117,7 @@ describe('react-progressive-graceful-image', () => {
   });
   it('sets image after delay passes if delay prop exists', () => {
     const delay = 3000;
-    const render = jest.fn(src => <img src={src} alt="an image" />);
+    const render = jest.fn(src => <img src={src} alt='an image' />);
     const wrapper = mountProgressiveImage(render, delay);
     wrapper.instance().loadImage(src);
     wrapper.instance().onLoad();
