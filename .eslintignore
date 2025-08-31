@@ -1,1 +1,6 @@
-/**/*.d.ts
+dist.js
+umd/
+node_modules/
+coverage/
+*.min.js
+demo/bundle.js
