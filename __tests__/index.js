@@ -1,10 +1,29 @@
+import '@testing-library/jest-dom';
+import { act, render, screen } from '@testing-library/react';
 import 'raf/polyfill';
-import React from 'react';
-import { configure, mount } from 'enzyme';
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import ProgressiveImage from '../src';
 
-configure({ adapter: new Adapter() });
+let capturedOnChange;
+jest.mock('react-intersection-observer', () => ({
+  InView: ({ children, onChange }) => {
+    capturedOnChange = onChange;
+    if (typeof children === 'function') {
+      return children({ inView: false, ref: jest.fn() });
+    }
+    return <div>{children}</div>;
+  }
+}));
+
+// Mock IntersectionObserver
+const mockObserve = jest.fn();
+const mockUnobserve = jest.fn();
+const mockDisconnect = jest.fn();
+
+global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+  observe: mockObserve,
+  unobserve: mockUnobserve,
+  disconnect: mockDisconnect
+}));
 
 const src = 'https://via.placeholder.com/300x200/000/source';
 const placeholder = 'https://via.placeholder.com/30x20/000/placeholder';
@@ -13,116 +32,183 @@ const srcSetData = {
   sizes: 'sizes'
 };
 
-const mountProgressiveImage = (renderFn, delay) => {
-  const defaultRender = jest.fn(src => <img src={src} alt="an image" />);
-
-  const render = renderFn || defaultRender;
-  return mount(
-    <ProgressiveImage
-      delay={delay}
-      src={src}
-      placeholder={placeholder}
-      srcSetData={srcSetData}
-      noLazyLoad={true}
-    >
-      {render}
-    </ProgressiveImage>
-  );
-};
-
 describe('react-progressive-graceful-image', () => {
-  beforeEach(() => {
-    global.Image = Image;
+  let nativeImage;
+
+  beforeAll(() => {
+    nativeImage = global.Image;
   });
+
+  afterAll(() => {
+    global.Image = nativeImage;
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Mock Image
+    global.Image = class {
+      constructor() {
+        setTimeout(() => {
+          if (this.onload && !this.error) {
+            // Simulate async loading
+          }
+        }, 0);
+      }
+      set src(value) {
+        this._src = value;
+      }
+      get src() {
+        return this._src;
+      }
+    };
+  });
+
   it('exports a React component', () => {
     expect(typeof ProgressiveImage).toBe('function');
   });
+
   it('throws if not provided a function as a child', () => {
-    /* eslint-disable no-console */
-    const _error = console.error;
-    console.error = jest.fn(() => {});
-    try {
-      expect(() => {
-        mount(
-          <ProgressiveImage>
-            <h1>Uh oh!</h1>
-          </ProgressiveImage>
-        );
-      }).toThrow(`ProgressiveImage requires a function as its only child`);
-    } finally {
-      console.error = _error;
-    }
-    /* eslint-enable no-console */
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    expect(() => {
+      render(
+        <ProgressiveImage src={src} placeholder={placeholder}>
+          <h1>Uh oh!</h1>
+        </ProgressiveImage>
+      );
+    }).toThrow(`ProgressiveImage requires a function as its only child`);
+    consoleSpy.mockRestore();
   });
-  it('creates an instance of Image when mounted', () => {
-    const wrapper = mountProgressiveImage();
-    const instance = wrapper.instance();
-    wrapper.instance().loadImage(src);
-    expect(instance.image.constructor).toBe(HTMLImageElement);
+
+  it('renders placeholder image on initial render when noLazyLoad is false', () => {
+    const { container } = render(
+      <ProgressiveImage src={src} placeholder={placeholder}>
+        {image => <img src={image} alt="test" />}
+      </ProgressiveImage>
+    );
+    const img = screen.getByAltText('test');
+    expect(img.src).toBe(placeholder);
   });
-  it('sets the onload property on the Image instance', () => {
-    const wrapper = mountProgressiveImage();
-    const instance = wrapper.instance();
-    wrapper.instance().loadImage(src);
-    expect(instance.image.onload).toEqual(instance.onLoad);
+
+  it('renders src image immediately when noLazyLoad is true', () => {
+    render(
+      <ProgressiveImage src={src} placeholder={placeholder} noLazyLoad={true}>
+        {image => <img src={image} alt="test" />}
+      </ProgressiveImage>
+    );
+    const img = screen.getByAltText('test');
+    expect(img.src).toBe(src);
   });
-  it('sets the onerror property on the Image instance', () => {
-    const wrapper = mountProgressiveImage();
-    const instance = wrapper.instance();
-    // expect(instance.image.onerror).toEqual(instance.onError);
+
+  it('switches to src image after loading when noLazyLoad is true (simulated)', async () => {
+    // We need to manually trigger the load since we're mocking Image
+    let imageInstance;
+    global.Image = class {
+      constructor() {
+        imageInstance = this;
+      }
+      set src(v) {
+        this._src = v;
+      }
+      get src() {
+        return this._src;
+      }
+    };
+
+    render(
+      <ProgressiveImage src={src} placeholder={placeholder} noLazyLoad={false}>
+        {image => <img src={image} alt="test" />}
+      </ProgressiveImage>
+    );
+
+    // Simulate intersection
+    act(() => {
+      capturedOnChange(true, { isIntersecting: true });
+    });
+
+    expect(imageInstance.src).toBe(src);
+
+    act(() => {
+      imageInstance.onload();
+    });
+
+    const img = screen.getByAltText('test');
+    expect(img.src).toBe(src);
   });
-  it('sets the src property on the Image instance', () => {
-    const wrapper = mountProgressiveImage();
-    const instance = wrapper.instance();
-    wrapper.instance().loadImage(src);
-    expect(instance.image.src).toEqual(src);
+
+  it('respects delay prop before switching to src', async () => {
+    jest.useFakeTimers();
+    let imageInstance;
+    global.Image = class {
+      constructor() {
+        imageInstance = this;
+      }
+      set src(v) {
+        this._src = v;
+      }
+      get src() {
+        return this._src;
+      }
+    };
+
+    render(
+      <ProgressiveImage src={src} placeholder={placeholder} delay={1000}>
+        {image => <img src={image} alt="test" />}
+      </ProgressiveImage>
+    );
+
+    // Simulate intersection
+    act(() => {
+      capturedOnChange(true, { isIntersecting: true });
+    });
+
+    act(() => {
+      imageInstance.onload();
+    });
+
+    // Should still be placeholder because of delay
+    expect(screen.getByAltText('test').src).toBe(placeholder);
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByAltText('test').src).toBe(src);
+    jest.useRealTimers();
   });
-  // it('sets the srcSet property on the Image instance', () => {
-  //   const wrapper = mountProgressiveImage();
-  //   const instance = wrapper.instance();
-  //   expect(instance.image.srcset).toEqual(srcSetData.srcSet);
-  // });
-  // it('sets the sizes property on the Image instance', () => {
-  //   const wrapper = mountProgressiveImage();
-  //   const instance = wrapper.instance();
-  //   expect(instance.image.sizes).toEqual(srcSetData.sizes);
-  // });
-  it('renders placeholder image on initial render', () => {
-    const render = jest.fn(src => <img src={src} alt="an image" />);
-    const wrapper = mountProgressiveImage(render);
-    expect(render.mock.calls[0][0]).toEqual(src);
-  });
-  it('renders src image on second render', () => {
-    const render = jest.fn(src => <img src={src} alt="an image" />);
-    const wrapper = mountProgressiveImage(render);
-    wrapper.instance().loadImage(src);
-    wrapper.instance().onLoad();
-    expect(render.mock.calls[1][0]).toEqual(src);
-  });
-  it('sets loading to false after src image is loaded', () => {
-    const render = jest.fn(src => <img src={src} alt="an image" />);
-    const wrapper = mountProgressiveImage(render);
-    expect(render.mock.calls[0][1]).toEqual(false);
-    wrapper.instance().loadImage(src);
-    wrapper.instance().onLoad();
-    expect(render.mock.calls[1][1]).toEqual(false);
-  });
-  it('does not immediately set image if delay prop exists', () => {
-    const delay = 3000;
-    const render = jest.fn(src => <img src={src} alt="an image" />);
-    const wrapper = mountProgressiveImage(render, delay);
-    wrapper.instance().loadImage(src);
-    wrapper.instance().onLoad();
-    expect(wrapper.instance().state.image).toEqual(placeholder);
-  });
-  it('sets image after delay passes if delay prop exists', () => {
-    const delay = 3000;
-    const render = jest.fn(src => <img src={src} alt="an image" />);
-    const wrapper = mountProgressiveImage(render, delay);
-    wrapper.instance().loadImage(src);
-    wrapper.instance().onLoad();
-    setTimeout(() => {
-      expect(wrapper.instance().state.image).toEqual(src);
-    }, delay + 1);
+
+  it('handles src change correctly', async () => {
+    let imageInstance;
+    global.Image = class {
+      constructor() {
+        imageInstance = this;
+      }
+      set src(v) {
+        this._src = v;
+      }
+      get src() {
+        return this._src;
+      }
+    };
+
+    const { rerender } = render(
+      <ProgressiveImage src={src} placeholder={placeholder} noLazyLoad={true}>
+        {image => <img src={image} alt="test" />}
+      </ProgressiveImage>
+    );
+
+    const newSrc = 'https://via.placeholder.com/300x200/fff/new-source';
+    rerender(
+      <ProgressiveImage
+        src={newSrc}
+        placeholder={placeholder}
+        noLazyLoad={true}
+      >
+        {image => <img src={image} alt="test" />}
+      </ProgressiveImage>
+    );
+
+    expect(screen.getByAltText('test').src).toBe(newSrc);
   });
 });

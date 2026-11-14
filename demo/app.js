@@ -62,7 +62,7 @@ class App extends React.Component {
                 4}${i + 3}a/ffffff/&text=BigImage${i + 1} 2000w`
             }}
             rootMargin="0% 0% 0%"
-            threshold={[1]}
+            threshold={[0.8]}
           >
             {(image, loading, srcSetData) => {
               return (
