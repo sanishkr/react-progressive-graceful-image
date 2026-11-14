@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react';
-import Observer from '@researchgate/react-intersection-observer';
+import { InView } from 'react-intersection-observer';
 
 type SrcSetData = {
   srcSet: string,
@@ -152,26 +152,9 @@ export default class ProgressiveImage extends React.Component<Props, State> {
     }
   };
 
-  handleIntersection = (event, unobserve, isOnline) => {
-    if (event.isIntersecting) {
-      const { src, srcSetData } = this.props;
-      if (isOnline) {
-        this.loadImage(src, srcSetData);
-        unobserve();
-      }
-    }
-  };
-
   render() {
-    const options = {
-      onChange: (event, unobserve) =>
-        this.handleIntersection(event, unobserve, this.state.isOnline),
-      rootMargin: this.props.rootMargin || '0% 0% 25%',
-      threshold: this.props.threshold || [0],
-      disabled: this.props.noLazyLoad || false
-    };
-    const { image, loading, srcSetData } = this.state;
-    const { src, children, noRetry, noLazyLoad } = this.props;
+    const { image, loading, srcSetData, isOnline } = this.state;
+    const { src, children, noLazyLoad, rootMargin, threshold } = this.props;
 
     if (!children || typeof children !== 'function') {
       throw new Error(`ProgressiveImage requires a function as its only child`);
@@ -182,7 +165,23 @@ export default class ProgressiveImage extends React.Component<Props, State> {
     }
 
     return (
-      <Observer {...options}>{children(image, loading, srcSetData)}</Observer>
+      <InView
+        rootMargin={rootMargin || '0% 0% 25%'}
+        threshold={threshold || 0}
+        onChange={inView => {
+          if (inView && this.state.isOnline && this.state.loading) {
+            this.loadImage(src, this.props.srcSetData);
+          }
+        }}
+      >
+        {({ ref }) => {
+          const result = children(image, loading, srcSetData);
+          if (React.isValidElement(result)) {
+            return React.cloneElement(result, { ref });
+          }
+          return <div ref={ref}>{result}</div>;
+        }}
+      </InView>
     );
   }
 }
